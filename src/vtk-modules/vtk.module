@@ -1,0 +1,5 @@
+#%Module1.0
+setenv VTKHOME /opt/vtk
+prepend-path PATH /opt/vtk/bin
+prepend-path LD_LIBRARY_PATH /opt/vtk/lib
+setenv TCLLIBPATH /opt/vtk/lib/tcltk/vtk-6.1
