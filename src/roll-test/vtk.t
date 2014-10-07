@@ -24,23 +24,19 @@ if($appliance =~ /$installedOnAppliancesPattern/) {
 # vtk
 SKIP: {
   skip 'vtk not installed', 1 if ! -d '/opt/vtk';
-  $output = `. /etc/profile.d/modules.sh; module load $compiler $mpi_$network vtk;vtk -help 2>&1`;
+  $output = `. /etc/profile.d/modules.sh; module load $compiler ${mpi}_$network vtk;vtk -help 2>&1`;
   ok($output =~ /-geometry: Initial geometry for window/, 'vtk works');
 
 }
 
 SKIP: {
-
   skip 'vtk not installed', 1
     if $appliance !~ /$installedOnAppliancesPattern/;
-    my ($noVersion) = vtk;
+    my $noVersion = "vtk";
     `/bin/ls /opt/modulefiles/applications/$noVersion/[0-9]* 2>&1`;
     ok($? == 0, "vtk module installed");
     `/bin/ls /opt/modulefiles/applications/$noVersion/.version.[0-9]* 2>&1`;
     ok($? == 0, "vtk version module installed");
     ok(-l "/opt/modulefiles/applications/$noVersion/.version",
        "vtk version module link created");
-  }
-
 }
-
