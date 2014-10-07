@@ -1,6 +1,5 @@
 ROLLNAME        = vtk
-VERSION        :=$(shell bash version.sh -v)
-RELEASE        :=$(shell bash version.sh -h)
+RELEASE         = 0
 COLOR           = firebrick
 
 REDHAT.ROOT     = $(CURDIR)
