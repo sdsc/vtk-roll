@@ -74,6 +74,16 @@ MPISETUP = \
   echo === MPIHOME ===; \
   echo $${MPIHOME}
 
+ifeq ("$(MPIMODULE)", "openmpi_ib")
+  MPI_CLIBS = -L/opt/openmpi/$(ROLLCOMPILER)/ib -lmpi -libverbs -lrt -lnsl -lutil -ltorque -ldl -lm -lrt -lnsl -lutil
+  MPI_CXXLIBS = -L/opt/openmpi/$(ROLLCOMPILER)/ib -lmpi_cxx -lmpi -libverbs -lrt -lnsl -lutil -ltorque -ldl -lm -lrt -lnsl -lutil
+else ifeq ("$(MPIMODULE)", "mvapich2_ib")
+  MPI_CLIBS = -L/opt/mvapich2/$(ROLLCOMPILER)/ib -lmpich -lopa -lmpl -libmad -lrdmacm -libumad -libverbs -lrt -lhwloc -llimic2 -lpthread -lhwloc
+  MPI_CXXLIBS = -L/opt/mvapich2/$(ROLLCOMPILER)/ib -lmpich -lopa -lmpl -libmad -lrdmacm -libumad -libverbs -lrt -lhwloc -llimic2 -lpthread -lhwloc
+endif
+
+
+
 REDHAT.ROOT = $(CURDIR)/../../
 
 -include $(ROCKSROOT)/etc/Rules.mk
@@ -88,21 +98,22 @@ build: $(SRC_DIRS)
 	  cd $(SOURCE_DIR); \
           mkdir build; \
           cd build; \
-          MPICLIB=`mpicc -show |sed 's/.*-L//'`; \
-          MPICLIB=-L$${MPICLIB}; \
-          MPICXXLIB=`mpicxx -show |sed 's/.*-L//'`; \
-          MPICXXLIB=-L$${MPICXXLIB}; \
-          cmake -DVTK_WRAP_PYTHON=ON -DVTK_WRAP_TCL=ON -DVTK_WRAP_JAVA=ON -DVTK_Group_MPI=ON -DMPI_C_LIBRARIES=$${MPICLIB} -DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include  -DMPI_CXX_LIBRARIES=$${MPICXXLIB} DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include  -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(ROOT)/$(PKGROOT) .. ; \
+          MPICLIB="$(MPI_CLIBS); \
+          MPICXXLIB="$(MPI_CXXLIBS); \
+          cmake -DVTK_WRAP_PYTHON=ON -DVTK_WRAP_TCL=ON -DVTK_WRAP_JAVA=ON -DVTK_Group_MPI=ON -DMPI_C_LIBRARIES=$${MPICLIB} -DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include  -DMPI_CXX_LIBRARIES=$${MPICXXLIB} DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include  -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PKGROOT) .. ; \
 	  $(MAKE); \
 	)
 	@echo "::: Package $(NAME) build complete :::"
 	
 install::
 	mkdir -p $(ROOT)/$(PKGROOT)
+	mkdir -p $(PKGROOT)
+	mount --bind $(ROOT)/$(PKGROOT) $(PKGROOT)
 	( \
 	  cd $(SOURCE_DIR)/build; \
 	  $(MAKE) install; \
 	)
+	-umount $(PKGROOT)
 	@echo "::: Package $(NAME) install complete :::"
 
 clean::
