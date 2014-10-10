@@ -54,21 +54,29 @@
 # 
 # @Copyright@
 #
-# $Log$
-#
+
+REDHAT.ROOT = $(CURDIR)/../../
+
+-include $(ROCKSROOT)/etc/Rules.mk
+include Rules.mk
+include pull.mk
+
 ifeq ("$(ROLLNETWORK)", "eth")
   MPIMODULE = $(ROLLMPI)
 else
   MPIMODULE = $(ROLLMPI)_$(ROLLNETWORK)
 endif
+
 CMAKESETUP = \
   module load cmake || true; \
   echo === cmake version ===; \
   cmake --version
+
 COMPILERSETUP =  \
   module load $(ROLLCOMPILER) || true; \
   echo === Compiler and version ===; \
   $(CC) --version
+
 MPISETUP = \
   module load $(MPIMODULE) || true; \
   echo === MPIHOME ===; \
@@ -82,38 +90,30 @@ else ifeq ("$(MPIMODULE)", "mvapich2_ib")
   MPI_CXXLIBS = -L/opt/mvapich2/$(ROLLCOMPILER)/ib -lmpich -lopa -lmpl -libmad -lrdmacm -libumad -libverbs -lrt -lhwloc -llimic2 -lpthread -lhwloc
 endif
 
-
-
-REDHAT.ROOT = $(CURDIR)/../../
-
--include $(ROCKSROOT)/etc/Rules.mk
-include Rules.mk
-include pull.mk
-
 build: $(SRC_DIRS)
+	mkdir $(SOURCE_DIR)/build
 	( \
-          $(COMPILERSETUP); \
-          $(MPISETUP); \
-          $(CMAKESETUP); \
-	  cd $(SOURCE_DIR); \
-          mkdir build; \
-          cd build; \
-          MPICLIB="$(MPI_CLIBS); \
-          MPICXXLIB="$(MPI_CXXLIBS); \
-          cmake -DVTK_WRAP_PYTHON=ON -DVTK_WRAP_TCL=ON -DVTK_WRAP_JAVA=ON -DVTK_Group_MPI=ON -DMPI_C_LIBRARIES=$${MPICLIB} -DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include  -DMPI_CXX_LIBRARIES=$${MPICXXLIB} DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include  -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PKGROOT) .. ; \
-	  $(MAKE); \
+	  $(COMPILERSETUP); \
+	  $(MPISETUP); \
+	  $(CMAKESETUP); \
+	  cd $(SOURCE_DIR)/build; \
+	  MPICLIB="$(MPI_CLIBS); \
+	  MPICXXLIB="$(MPI_CXXLIBS); \
+	  cmake -DVTK_WRAP_PYTHON=ON -DVTK_WRAP_TCL=ON -DVTK_WRAP_JAVA=ON -DVTK_Group_MPI=ON -DMPI_C_LIBRARIES=$${MPICLIB} -DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include  -DMPI_CXX_LIBRARIES=$${MPICXXLIB} DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include  -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PKGROOT) .. ; \
+	  $(MAKE) \
 	)
 	@echo "::: Package $(NAME) build complete :::"
 	
 install::
-	mkdir -p $(ROOT)/$(PKGROOT)
-	mkdir -p $(PKGROOT)
+	mkdir -p -m 755 $(ROOT)/$(PKGROOT)
+	-mkdir -p -m 755 $(PKGROOT)
 	mount --bind $(ROOT)/$(PKGROOT) $(PKGROOT)
 	( \
 	  cd $(SOURCE_DIR)/build; \
-	  $(MAKE) install; \
+	  $(MAKE) install \
 	)
-	-umount $(PKGROOT)
+	umount $(PKGROOT)
+	-rmdir -p $(PKGROOT)
 	@echo "::: Package $(NAME) install complete :::"
 
 clean::
