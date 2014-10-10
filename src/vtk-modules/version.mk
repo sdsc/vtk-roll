@@ -1,5 +1,5 @@
 NAME        = vtk-modules
-RELEASE     = 0
+RELEASE     = 1
 PKGROOT     = /opt/modulefiles/applications/vtk
 
 VERSION_SRC = $(REDHAT.ROOT)/src/vtk/version.mk
