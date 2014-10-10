@@ -1,6 +1,8 @@
 #%Module1.0
 setenv VTKHOME /opt/vtk
 prepend-path PATH /opt/vtk/bin
-prepend-path LD_LIBRARY_PATH /opt/vtk/lib
-prepend-path PYTHONPATH /opt/vtk/lib/python2.6/site-packages
+set lib [glob -nocomplain /opt/vtk/lib*]
+prepend-path LD_LIBRARY_PATH $lib
+set lib [glob -nocomplain $lib/python*/site-packages]
+prepend-path PYTHONPATH $lib
 setenv TCLLIBPATH /opt/vtk/lib/tcltk/vtk-6.1
