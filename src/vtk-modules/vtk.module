@@ -6,3 +6,4 @@ prepend-path LD_LIBRARY_PATH $lib
 set lib [glob -nocomplain $lib/python*/site-packages]
 prepend-path PYTHONPATH $lib
 setenv TCLLIBPATH /opt/vtk/lib/tcltk/vtk-6.1
+module load ROLLCOMPILER ROLLMPI

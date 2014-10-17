@@ -5,7 +5,6 @@
 #   if not specified, the test assumes either Compute or Frontend
 my $compiler="ROLLCOMPILER";
 my $mpi="ROLLMPI";
-my $network="ROLLNETWORK";
 
 use Test::More qw(no_plan);
 
@@ -24,7 +23,7 @@ if($appliance =~ /$installedOnAppliancesPattern/) {
 # vtk
 SKIP: {
   skip 'vtk not installed', 1 if ! -d '/opt/vtk';
-  $output = `. /etc/profile.d/modules.sh; module load $compiler ${mpi}_$network vtk;vtk -help 2>&1`;
+  $output = `module load vtk;vtk -help 2>&1`;
   ok($output =~ /-geometry: Initial geometry for window/, 'vtk works');
 
 }

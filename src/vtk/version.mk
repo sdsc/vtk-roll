@@ -7,17 +7,14 @@ endif
 COMPILERNAME := $(firstword $(subst /, ,$(ROLLCOMPILER)))
 
 ifndef ROLLMPI
-  ROLLMPI = openmpi
+  ROLLMPI = rocks-openmpi
 endif
-
-ifndef ROLLNETWORK
-  ROLLNETWORK = eth
-endif
+MPINAME := $(firstword $(subst /, ,$(ROLLMPI)))
 
 PKGROOT        = /opt/vtk
-NAME           = vtk_$(COMPILERNAME)_$(ROLLMPI)_$(ROLLNETWORK)
+NAME           = vtk_$(COMPILERNAME)_$(MPINAME)
 VERSION        = 6.1.0
-RELEASE        = 1
+RELEASE        = 2
 
 SRC_SUBDIR     = vtk
 

@@ -61,12 +61,6 @@ REDHAT.ROOT = $(CURDIR)/../../
 include Rules.mk
 include pull.mk
 
-ifeq ("$(ROLLNETWORK)", "eth")
-  MPIMODULE = $(ROLLMPI)
-else
-  MPIMODULE = $(ROLLMPI)_$(ROLLNETWORK)
-endif
-
 CMAKESETUP = \
   module load cmake || true; \
   echo === cmake version ===; \
@@ -78,16 +72,14 @@ COMPILERSETUP =  \
   $(CC) --version
 
 MPISETUP = \
-  module load $(MPIMODULE) || true; \
+  module load $(ROLLMPI) || true; \
   echo === MPIHOME ===; \
   echo $${MPIHOME}
 
-ifeq ("$(MPIMODULE)", "openmpi_ib")
-  MPI_CLIBS = -L/opt/openmpi/$(ROLLCOMPILER)/ib -lmpi -libverbs -lrt -lnsl -lutil -ltorque -ldl -lm -lrt -lnsl -lutil
-  MPI_CXXLIBS = -L/opt/openmpi/$(ROLLCOMPILER)/ib -lmpi_cxx -lmpi -libverbs -lrt -lnsl -lutil -ltorque -ldl -lm -lrt -lnsl -lutil
-else ifeq ("$(MPIMODULE)", "mvapich2_ib")
-  MPI_CLIBS = -L/opt/mvapich2/$(ROLLCOMPILER)/ib -lmpich -lopa -lmpl -libmad -lrdmacm -libumad -libverbs -lrt -lhwloc -llimic2 -lpthread -lhwloc
-  MPI_CXXLIBS = -L/opt/mvapich2/$(ROLLCOMPILER)/ib -lmpich -lopa -lmpl -libmad -lrdmacm -libumad -libverbs -lrt -lhwloc -llimic2 -lpthread -lhwloc
+# Assume openmpi, test for mvapich2
+MPILIBS = -L$${MPIHOME}/lib -lmpi_cxx -lmpi -libverbs -lrt -lnsl -lutil -ldl -lm -lrt -lnsl -lutil
+ifneq ("$(ROLLMPI)", "$(subst mvapich2,,$(ROLLMPI))")
+  MPILIBS = -L$${MPIHOME}/lib -lmpich -lopa -lmpl -libmad -lrdmacm -libumad -libverbs -lrt -lhwloc -llimic2 -lpthread -lhwloc
 endif
 
 build: $(SRC_DIRS)
@@ -97,9 +89,13 @@ build: $(SRC_DIRS)
 	  $(MPISETUP); \
 	  $(CMAKESETUP); \
 	  cd $(SOURCE_DIR)/build; \
-	  MPICLIB="$(MPI_CLIBS); \
-	  MPICXXLIB="$(MPI_CXXLIBS); \
-	  cmake -DVTK_WRAP_PYTHON=ON -DVTK_WRAP_TCL=ON -DVTK_WRAP_JAVA=ON -DVTK_Group_MPI=ON -DMPI_C_LIBRARIES=$${MPICLIB} -DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include  -DMPI_CXX_LIBRARIES=$${MPICXXLIB} DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include  -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PKGROOT) .. ; \
+	  cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PKGROOT) \
+	        -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON \
+	        -DVTK_WRAP_PYTHON=ON -DVTK_WRAP_TCL=ON -DVTK_WRAP_JAVA=ON \
+	        -DVTK_Group_MPI=ON -DMPI_C_LIBRARIES="$(MPILIBS)"\
+	        -DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include \
+	        -DMPI_CXX_LIBRARIES="$(MPILIBS)" \
+	        ..; \
 	  $(MAKE) \
 	)
 	@echo "::: Package $(NAME) build complete :::"
