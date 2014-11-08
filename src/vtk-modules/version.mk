@@ -1,6 +1,9 @@
-NAME        = vtk-modules
-RELEASE     = 1
-PKGROOT     = /opt/modulefiles/applications/vtk
+PACKAGE     = vtk
+CATEGORY    = applications
+
+NAME        = sdsc-$(PACKAGE)-modules
+RELEASE     = 2
+PKGROOT     = /opt/modulefiles/$(CATEGORY)/$(PACKAGE)
 
 VERSION_SRC = $(REDHAT.ROOT)/src/vtk/version.mk
 VERSION_INC = version.inc

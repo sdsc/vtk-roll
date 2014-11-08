@@ -1,6 +1,3 @@
-# Note: normally this package is built with a single compiler, and the rpms
-# from multiple compiler builds will overwrite each other.
-
 ifndef ROLLCOMPILER
   ROLLCOMPILER = gnu
 endif
@@ -12,7 +9,7 @@ endif
 MPINAME := $(firstword $(subst /, ,$(ROLLMPI)))
 
 PKGROOT        = /opt/vtk
-NAME           = vtk_$(COMPILERNAME)_$(MPINAME)
+NAME           = sdsc-vtk
 VERSION        = 6.1.0
 RELEASE        = 2
 

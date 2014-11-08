@@ -59,22 +59,8 @@ REDHAT.ROOT = $(CURDIR)/../../
 
 -include $(ROCKSROOT)/etc/Rules.mk
 include Rules.mk
-include pull.mk
-
-CMAKESETUP = \
-  module load cmake || true; \
-  echo === cmake version ===; \
-  cmake --version
-
-COMPILERSETUP =  \
-  module load $(ROLLCOMPILER) || true; \
-  echo === Compiler and version ===; \
-  $(CC) --version
-
-MPISETUP = \
-  module load $(ROLLMPI) || true; \
-  echo === MPIHOME ===; \
-  echo $${MPIHOME}
+include $(SDSCDEVEL)/Pull.mk
+include $(SDSCDEVEL)/Rules.mk
 
 # Assume openmpi, test for mvapich2
 MPILIBS = -L$${MPIHOME}/lib -lmpi_cxx -lmpi -libverbs -lrt -lnsl -lutil -ldl -lm -lrt -lnsl -lutil
@@ -82,12 +68,30 @@ ifneq ("$(ROLLMPI)", "$(subst mvapich2,,$(ROLLMPI))")
   MPILIBS = -L$${MPIHOME}/lib -lmpich -lopa -lmpl -libmad -lrdmacm -libumad -libverbs -lrt -lhwloc -llimic2 -lpthread -lhwloc
 endif
 
+LICENSE_FILES = $(SOURCE_DIR)/Copyright.txt
+
+$(NAME).spec: DESCRIPTION LICENSE
+
+DESCRIPTION:
+	$(MODULE_LOAD_CC); \
+	( \
+	  $(DESCRIBE_PKG); \
+	  $(DESCRIBE_CC); \
+	  $(DESCRIBE_MPI); \
+	) > $@
+
+LICENSE: $(SRC_DIRS)
+	if ! grep -q "2008 Ken Martin" $(LICENSE_FILES); then \
+	  exit 2; \
+	fi
+	echo -e BSD > $@
+
 build: $(SRC_DIRS)
 	mkdir $(SOURCE_DIR)/build
 	( \
-	  $(COMPILERSETUP); \
-	  $(MPISETUP); \
-	  $(CMAKESETUP); \
+	  $(MODULE_LOAD_CC); \
+	  $(MODULE_LOAD_MPI); \
+	  $(MODULE_LOAD_CMAKE); \
 	  cd $(SOURCE_DIR)/build; \
 	  cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PKGROOT) \
 	        -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON \
@@ -102,15 +106,13 @@ build: $(SRC_DIRS)
 	
 install::
 	mkdir -p -m 755 $(ROOT)/$(PKGROOT)
-	-mkdir -p -m 755 $(PKGROOT)
-	mount --bind $(ROOT)/$(PKGROOT) $(PKGROOT)
+	$(PKGROOT_BIND_MOUNT)
 	( \
 	  cd $(SOURCE_DIR)/build; \
 	  $(MAKE) install \
 	)
-	umount $(PKGROOT)
-	-rmdir -p $(PKGROOT)
+	$(PKGROOT_BIND_UMOUNT)
 	@echo "::: Package $(NAME) install complete :::"
 
 clean::
-	rm -rf $(SOURCE_DIR)
+	rm -rf $(SOURCE_DIR) DESCRIPTION LICENSE
