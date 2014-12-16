@@ -68,8 +68,6 @@ ifneq ("$(ROLLMPI)", "$(subst mvapich2,,$(ROLLMPI))")
   MPILIBS = -L$${MPIHOME}/lib -lmpich -lopa -lmpl -libmad -lrdmacm -libumad -libverbs -lrt -lhwloc -llimic2 -lpthread -lhwloc
 endif
 
-LICENSE_FILES = $(SOURCE_DIR)/Copyright.txt
-
 $(NAME).spec: DESCRIPTION LICENSE
 
 DESCRIPTION:
@@ -81,9 +79,7 @@ DESCRIPTION:
 	) > $@
 
 LICENSE: $(SRC_DIRS)
-	if ! grep -q "2008 Ken Martin" $(LICENSE_FILES); then \
-	  exit 2; \
-	fi
+	$(CHECK_LICENSE_FILES)
 	echo -e BSD > $@
 
 build: $(SRC_DIRS)
@@ -112,6 +108,7 @@ install::
 	  $(MAKE) install \
 	)
 	$(PKGROOT_BIND_UMOUNT)
+	$(INSTALL_LICENSE_FILES)
 	@echo "::: Package $(NAME) install complete :::"
 
 clean::
