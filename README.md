@@ -10,6 +10,8 @@ For more information about the various packages included in the vtk roll please 
 
 ## Requirements
 
+yum install mesa-libGL-devel
+
 To build/install this roll you must have root access to a Rocks development
 machine (e.g., a frontend or development appliance).
 
