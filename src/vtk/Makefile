@@ -72,10 +72,12 @@ $(NAME).spec: DESCRIPTION LICENSE
 
 DESCRIPTION:
 	$(MODULE_LOAD_CC); \
+	$(MODULE_LOAD_PYTHON); \
 	( \
 	  $(DESCRIBE_PKG); \
 	  $(DESCRIBE_CC); \
 	  $(DESCRIBE_MPI); \
+	  $(DESCRIBE_PYTHON) \
 	) > $@
 
 LICENSE: $(SRC_DIRS)
@@ -88,10 +90,16 @@ build: $(SRC_DIRS)
 	  $(MODULE_LOAD_CC); \
 	  $(MODULE_LOAD_MPI); \
 	  $(MODULE_LOAD_CMAKE); \
+	  $(MODULE_LOAD_PYTHON); \
+	  PYHOME=`which python | sed "s/\/bin.*//"`; \
+	  PYTHON_INCLUDE_DIR=$$PYHOME/include/python$(PYVERSION); \
+	  PYTHON_LIBRARY=`find $$PYHOME -name libpython$(PYVERSION).so | head -1`; \
 	  cd $(SOURCE_DIR)/build; \
 	  cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PKGROOT) \
 	        -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON \
 	        -DVTK_WRAP_PYTHON=ON -DVTK_WRAP_TCL=ON -DVTK_WRAP_JAVA=ON \
+	        -DPYTHON_INCLUDE_DIR=$$PYTHON_INCLUDE_DIR \
+	        -DPYTHON_LIBRARY=$$PYTHON_LIBRARY \
 	        -DVTK_Group_MPI=ON -DMPI_C_LIBRARIES="$(MPILIBS)"\
 	        -DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include \
 	        -DMPI_CXX_LIBRARIES="$(MPILIBS)" \
