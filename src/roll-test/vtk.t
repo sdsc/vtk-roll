@@ -8,7 +8,7 @@ use Test::More qw(no_plan);
 
 my $appliance = $#ARGV >= 0 ? $ARGV[0] :
                 -d '/export/rocks/install' ? 'Frontend' : 'Compute';
-my $installedOnAppliancesPattern = 'Compute';
+my $installedOnAppliancesPattern = '.';
 my $isInstalled = -d "/opt/vtk";
 my $output;
 
