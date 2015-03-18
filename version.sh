@@ -5,7 +5,7 @@ DESC=`git describe --match 'v*' 2>/dev/null | sed "s/v\([0-9\.]*\)-*\([0-9]*\)-*
 if [ -z "${DESC}" ]
 then
     # Try to support using the tagged downloads
-    DESC=`pwd | grep -oe 'perftest-.\+' | sed 's/perftest-//g'`
+    DESC=`pwd | grep -oe 'vtk-.\+' | sed 's/vtk-//g'`
     LOCAL_REV="-github_archive"
 fi
 
