@@ -91,9 +91,10 @@ build: $(SRC_DIRS)
 	  $(MODULE_LOAD_MPI); \
 	  $(MODULE_LOAD_CMAKE); \
 	  $(MODULE_LOAD_PYTHON); \
+	  pyvers=`python --version 2>&1 | grep -o '[0-9][0-9]*\.[0-9][0-9]*'`; \
 	  PYHOME=`which python | sed "s/\/bin.*//"`; \
-	  PYTHON_INCLUDE_DIR=$$PYHOME/include/python$(PYVERSION); \
-	  PYTHON_LIBRARY=`find $$PYHOME -name libpython$(PYVERSION).so | head -1`; \
+	  PYTHON_INCLUDE_DIR=$$PYHOME/include/python$${pyvers}; \
+	  PYTHON_LIBRARY=`find $$PYHOME -name libpython$${pyvers}.so | head -1`; \
 	  cd $(SOURCE_DIR)/build; \
 	  cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PKGROOT) \
 	        -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON \

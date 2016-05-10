@@ -63,8 +63,6 @@ default:
 	@echo "copyright|rpm|pkg|clean"
 
 copyright rpm pkg clean::
-	module load $(ROLLPY); \
-	pyver=`python -V 2>&1 | grep -o '[0-9]\.[0-9]*'`; \
 	for i in $(SRCDIRS); do \
-	  (cd $$i && $(MAKE) ROLLCOMPILER="$(ROLLCOMPILER)" ROLLMPI="$(ROLLMPI)" ROLLPY="$(PYTHON)" PYVERSION="$${pyver}" $@) || exit 2; \
+	  (cd $$i && $(MAKE) ROLLCOMPILER="$(ROLLCOMPILER)" ROLLMPI="$(ROLLMPI)" ROLLPY="$(PYTHON)" $@) || exit 2; \
 	done

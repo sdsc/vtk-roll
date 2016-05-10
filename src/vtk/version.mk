@@ -12,14 +12,10 @@ ifndef ROLLPY
   ROLLPY = python
 endif
 
-ifndef PYVERSION
-  PYVERSION = 2.6
-endif
-
 PKGROOT        = /opt/vtk
 NAME           = sdsc-vtk
 VERSION        = 6.1.0
-RELEASE        = 3
+RELEASE        = 4
 
 SRC_SUBDIR     = vtk
 
