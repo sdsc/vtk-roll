@@ -61,7 +61,7 @@ include $(SDSCDEVEL)/Pull.mk
 include $(SDSCDEVEL)/Rules.mk
 
 # Assume openmpi, test for mvapich2
-MPILIBS = -L$${MPIHOME}/lib -lmpi_cxx -lmpi -libverbs -lrt -lnsl -lutil -ldl -lm -lrt -lnsl -lutil
+MPILIBS = -L$${MPIHOME}/lib -lmpi -libverbs -lrt -lnsl -lutil -ldl -lm -lrt -lnsl -lutil
 ifneq ("$(ROLLMPI)", "$(subst mvapich2,,$(ROLLMPI))")
   MPILIBS = -L$${MPIHOME}/lib -lmpich -lopa -lmpl -libmad -lrdmacm -libumad -libverbs -lrt -lhwloc -llimic2 -lpthread -lhwloc
 endif
@@ -93,15 +93,21 @@ build: $(SRC_DIRS)
 	  PYHOME=`which python | sed "s/\/bin.*//"`; \
 	  PYTHON_INCLUDE_DIR=$$PYHOME/include/python$${pyvers}; \
 	  PYTHON_LIBRARY=`find $$PYHOME -name libpython$${pyvers}.so | head -1`; \
+	  export MPILIBS="$(MPILIBS)"; \
+	  if test -e $${MPIHOME}/lib/libmpi_cxx.a; then \
+	    export MPILIBS=`echo $$MPILIBS | sed 's/-lmpi/-lmpi_cxx -lmpi/'`; \
+	  fi; \
 	  cd $(SOURCE_DIR)/build; \
 	  cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PKGROOT) \
 	        -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON \
 	        -DVTK_WRAP_PYTHON=ON -DVTK_WRAP_TCL=ON -DVTK_WRAP_JAVA=ON \
 	        -DPYTHON_INCLUDE_DIR=$$PYTHON_INCLUDE_DIR \
 	        -DPYTHON_LIBRARY=$$PYTHON_LIBRARY \
-	        -DVTK_Group_MPI=ON -DMPI_C_LIBRARIES="$(MPILIBS)"\
+	        -DVTK_Group_MPI=ON -DMPI_C_LIBRARIES="$${MPILIBS}"\
 	        -DMPI_CXX_INCLUDE_PATH=$${MPIHOME}/include \
-	        -DMPI_CXX_LIBRARIES="$(MPILIBS)" \
+	        -DMPI_CXX_LIBRARIES="$${MPILIBS}" \
+	        -DCMAKE_C_FLAGS=-DGLX_GLXEXT_LEGACY \
+	        -DCMAKE_CXX_FLAGS=-DGLX_GLXEXT_LEGACY \
 	        ..; \
 	  $(MAKE) \
 	)
