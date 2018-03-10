@@ -4,4 +4,4 @@ RELEASE    = 3
 PKGROOT    = /root/rolltests
 
 RPM.EXTRAS = AutoReq:No\nAutoProv:No
-RPM.PREFIX = $(PKGROOT)
+RPM.FILES  = $(PKGROOT)/vtk.t
